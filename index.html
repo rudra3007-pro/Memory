@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blessingss 🌙</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Poppins",system-ui,sans-serif;
+}
+
+body{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:radial-gradient(
+    circle at top,
+    #2e1065 0%,
+    #1e0b3c 45%,
+    #0f0220 100%
+  );
+  overflow:hidden;
+  color:#e5e7eb;
+}
+
+/* purple glow */
+.glow{
+  position:absolute;
+  width:340px;
+  height:340px;
+  background:#c084fc;
+  filter:blur(180px);
+  opacity:.22;
+  top:14%;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:0;
+}
+
+.card{
+  position:relative;
+  background:rgba(28,10,56,0.82);
+  backdrop-filter:blur(18px);
+  padding:48px 34px;
+  border-radius:28px;
+  text-align:center;
+  width:90%;
+  max-width:360px;
+  box-shadow:0 35px 70px rgba(0,0,0,.65);
+  z-index:2;
+  border:1px solid rgba(192,132,252,.18);
+}
+
+.symbol{
+  font-size:26px;
+  margin-bottom:12px;
+}
+
+.title{
+  font-size:12px;
+  letter-spacing:.2em;
+  color:#d8b4fe;
+  text-transform:uppercase;
+  margin-bottom:30px;
+}
+
+.count{
+  font-size:52px;
+  font-weight:600;
+  color:#f472b6;
+  margin-bottom:6px;
+}
+
+.sub{
+  font-size:13px;
+  color:#c4b5fd;
+  margin-bottom:36px;
+}
+
+button{
+  padding:14px 36px;
+  border:none;
+  border-radius:999px;
+  font-size:15px;
+  background:linear-gradient(135deg,#f472b6,#c084fc);
+  color:#1e022b;
+  cursor:pointer;
+  box-shadow:0 14px 34px rgba(192,132,252,.45);
+  transition:.3s ease;
+}
+
+button:hover{
+  transform:translateY(-2px);
+}
+
+button:active{
+  transform:scale(.96);
+}
+
+.note{
+  margin-top:28px;
+  font-size:12px;
+  color:#a78bfa;
+  line-height:1.6;
+}
+
+/* RESET BUTTON */
+.reset-btn{
+  margin-top:18px;
+  padding:8px 18px;
+  font-size:12px;
+  background:rgba(255,255,255,0.04);
+  color:#c4b5fd;
+  border:1px solid rgba(244,114,182,.35);
+  border-radius:999px;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  transition:all .25s ease;
+}
+
+.reset-btn:hover{
+  background:rgba(244,114,182,.12);
+  color:#f9a8d4;
+  border-color:#f472b6;
+  box-shadow:0 0 0 3px rgba(244,114,182,.2);
+}
+
+.reset-btn:active{
+  transform:scale(.95);
+}
+
+/* HEART ANIMATION */
+.heart{
+  position:absolute;
+  bottom:-20px;
+  font-size:26px;
+  filter:drop-shadow(0 0 14px rgba(244,114,182,.9));
+  animation:floatUp linear forwards;
+  pointer-events:none;
+}
+
+@keyframes floatUp{
+  from{
+    transform:translateY(0) scale(1);
+    opacity:1;
+  }
+  to{
+    transform:translateY(-120vh) scale(1.4);
+    opacity:0;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="glow"></div>
+
+<div class="card">
+  <div class="symbol">🌙</div>
+  <div class="title">This count shows the devotion towards the bond given by KRISHNA</div>
+
+  <div class="count" id="count">0</div>
+  <div class="sub">You remebered your sakhaa..you remebered Krishnaa..</div>
+
+  <button onclick="sendLove()">I Miss You</button>
+
+  <button class="reset-btn" onclick="resetCounter()">
+    ↺ Reset
+  </button>
+
+  <div class="note">
+    No notifications.<br>
+    Just a quiet presence.
+  </div>
+</div>
+
+<script>
+const BASE_URL = "https://script.google.com/macros/s/AKfycbxsKjFaGWjqBdWx7DCedPGkRaZmvvx6Jic5GKKQjYwl0XKWqg-N6Vwcn-l6ZcRs0IuI/exec"
+const RESET_URL = BASE_URL + "?action=reset"
+function resetCounter(){
+  localCount = 0
+  counterEl.textContent = 0
+  fetch(RESET_URL).catch(()=>{})
+}
+
+
+
+
+
+const VIEW_URL = BASE_URL + "?action=view"
+const HIT_URL  = BASE_URL + "?action=hit"
+
+const counterEl = document.getElementById("count")
+
+function loadCount(){
+  fetch(VIEW_URL)
+    .then(res => res.json())
+    .then(data => {
+      counterEl.textContent = data.value
+    })
+}
+
+function createHeart(){
+  const heart = document.createElement("div")
+  heart.className = "heart"
+heart.innerHTML = "❤️"
+  heart.style.left = Math.random()*100 + "vw"
+  heart.style.animationDuration = 3 + Math.random()*2 + "s"
+  document.body.appendChild(heart)
+
+  setTimeout(()=>heart.remove(),5000)
+}
+
+let localCount = 0
+
+function loadCount(){
+  fetch(VIEW_URL)
+    .then(res => res.json())
+    .then(data => {
+      localCount = data.value
+      counterEl.textContent = localCount
+    })
+}
+
+function sendLove(){
+  // optimistic increment
+  localCount++
+  counterEl.textContent = localCount
+
+  // hearts
+  burstHearts(10)
+  flowHearts(1200)
+
+  // backend update (NO UI overwrite)
+  fetch(HIT_URL).catch(()=>{})
+}
+
+function burstHearts(count){
+  for(let i=0;i<count;i++){
+    setTimeout(createHeart, i*60)
+  }
+}
+
+function flowHearts(duration){
+  const interval = setInterval(createHeart, 250)
+  setTimeout(()=>{
+    clearInterval(interval)
+  }, duration)
+}
+
+
+
+
+loadCount()
+</script>
+
+</body>
+</html>
