@@ -12,7 +12,6 @@
   box-sizing:border-box;
   font-family:"Poppins",system-ui,sans-serif;
 }
-
 body{
   height:100vh;
   display:flex;
@@ -22,7 +21,6 @@ body{
   overflow:hidden;
   color:#e5e7eb;
 }
-
 .glow{
   position:absolute;
   width:340px;
@@ -34,7 +32,6 @@ body{
   left:50%;
   transform:translateX(-50%);
 }
-
 .card{
   background:rgba(28,10,56,0.82);
   backdrop-filter:blur(18px);
@@ -48,7 +45,6 @@ body{
   position:relative;
   z-index:2;
 }
-
 .symbol{font-size:26px;margin-bottom:12px}
 .title{
   font-size:12px;
@@ -67,7 +63,6 @@ body{
   color:#c4b5fd;
   margin:10px 0 36px;
 }
-
 button{
   padding:14px 36px;
   border:none;
@@ -77,11 +72,7 @@ button{
   color:#1e022b;
   cursor:pointer;
   box-shadow:0 14px 34px rgba(192,132,252,.45);
-  transition:.3s ease;
 }
-button:hover{transform:translateY(-2px)}
-button:active{transform:scale(.96)}
-
 .reset-btn{
   margin-top:18px;
   padding:8px 18px;
@@ -91,26 +82,17 @@ button:active{transform:scale(.96)}
   border:1px solid rgba(244,114,182,.35);
   border-radius:999px;
   cursor:pointer;
-  transition:.25s ease;
 }
-.reset-btn:hover{
-  background:rgba(244,114,182,.12);
-  color:#f9a8d4;
-}
-
 .note{
   margin-top:26px;
   font-size:12px;
   color:#a78bfa;
 }
-
-/* HEARTS */
 .heart{
   position:absolute;
   bottom:-20px;
   font-size:26px;
-  filter:drop-shadow(0 0 14px rgba(244,114,182,.9));
-  animation:floatUp linear forwards;
+  animation:floatUp 2.5s linear forwards;
   pointer-events:none;
 }
 @keyframes floatUp{
@@ -130,90 +112,79 @@ button:active{transform:scale(.96)}
   <div class="count" id="count">0</div>
   <div class="sub">You remembered your sakhaa… you remembered Krishna…</div>
 
-  <button onclick="sendLove()">I Miss You</button>
-  <br>
+  <button onclick="sendLove()">I Miss You</button><br>
   <button class="reset-btn" onclick="resetCounter()">↺ Reset</button>
 
   <div class="note">No notifications.<br>Just a quiet presence.</div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const BASE_URL = "https://script.google.com/macros/s/AKfycbxsKjFaGWjqBdWx7DCedPGkRaZmvvx6Jic5GKKQjYwl0XKWqg-N6Vwcn-l6ZcRs0IuI/exec"
-const VIEW_URL  = BASE_URL + "?action=view"
-const HIT_URL   = BASE_URL + "?action=hit"
-const RESET_URL = BASE_URL + "?action=reset"
+const SUPABASE_URL = "https://yvcvuibaynqvlfddqblq.supabase.co"
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2Y3Z1aWJheW5xdmxmZGRxYmxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0OTgzMDMsImV4cCI6MjA4NDA3NDMwM30.EgX6BoioyFETtHNXtJMOwMxDF0AdCWrdH4KtPx79dR0"
+
+const { createClient } = supabase
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY)
 
 const counterEl = document.getElementById("count")
 let localCount = 0
-let syncing = false
 
-function loadCount(){
-  fetch(VIEW_URL)
-    .then(r=>r.json())
-    .then(d=>{
-      localCount = d.value
-      counterEl.textContent = localCount
-    })
-}
-
-function createHeart(){
-  const h=document.createElement("div")
-  h.className="heart"
-  h.innerHTML="❤️"
-  h.style.left=Math.random()*100+"vw"
-  h.style.animationDuration=3+Math.random()*2+"s"
+function spawnHeart(){
+  const h = document.createElement("div")
+  h.className = "heart"
+  h.textContent = "💗"
+  h.style.left = Math.random()*100+"vw"
   document.body.appendChild(h)
-  setTimeout(()=>h.remove(),5000)
+  setTimeout(()=>h.remove(),2500)
 }
 
-function burstHearts(n){
-  for(let i=0;i<n;i++) setTimeout(createHeart,i*60)
+async function loadCount(){
+  const { data, error } = await sb
+    .from("counter")
+    .select("value")
+    .eq("id",1)
+    .single()
+
+  if(!error){
+    localCount = data.value
+    counterEl.textContent = localCount
+  }
 }
 
-function flowHearts(ms){
-  const i=setInterval(createHeart,240)
-  setTimeout(()=>clearInterval(i),ms)
-}
-
-function sendLove(){
+async function sendLove(){
   localCount++
-  counterEl.textContent=localCount
-  burstHearts(10)
-  flowHearts(1200)
+  counterEl.textContent = localCount
 
-  fetch(HIT_URL)
-    .then(r=>r.json())
-    .then(d=>{
-      if(d.value>localCount){
-        localCount=d.value
-        counterEl.textContent=localCount
-      }
-    })
-    .catch(()=>{})
+  for(let i=0;i<8;i++) spawnHeart()
+
+  await sb.rpc("increment_counter")
 }
 
-function resetCounter(){
-  localCount=0
-  counterEl.textContent=0
-  fetch(RESET_URL).catch(()=>{})
-}
+async function resetCounter(){
+  localCount = 0
+  counterEl.textContent = 0
 
-/* background resync */
-setInterval(()=>{
-  if(syncing) return
-  syncing=true
-  fetch(VIEW_URL)
-    .then(r=>r.json())
-    .then(d=>{
-      if(d.value>localCount){
-        localCount=d.value
-        counterEl.textContent=localCount
-      }
-    })
-    .finally(()=>syncing=false)
-},5000)
+  await sb.from("counter").update({ value: 0 }).eq("id",1)
+}
 
 loadCount()
+const channel = sb
+  .channel("counter-realtime")
+  .on(
+    "postgres_changes",
+    {
+      event: "UPDATE",
+      schema: "public",
+      table: "counter"
+    },
+    payload => {
+      const newValue = payload.new.value
+      localCount = newValue
+      counterEl.textContent = newValue
+    }
+  )
+  .subscribe()
+
 </script>
 
 </body>
